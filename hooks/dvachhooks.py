@@ -31,6 +31,13 @@ class DvachShowHook(AbstractHook):
 class DvachFileDownloader(DvachShowHook):
     _alias = ["dvD"]
 
+    def __init__(self, save_path: str = None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if save_path is not None:
+            self._save_path = save_path
+        else:
+            self._save_path = "downloads"
+
     async def hook_action(self, output):
         posts = self.get_updated_text(output)
         download_list = []
@@ -38,10 +45,16 @@ class DvachFileDownloader(DvachShowHook):
             for file in post["files"]:
                 download_path = "2ch.hk" + file["path"]
                 download_to = download_path.split("/")
+
                 if "stickers" in download_to:
-                    download_to = f"downloads/{post['thread_num']}/{download_to[3]}"
+                    download_to = os.path.join(self._save_path,
+                                               post['thread_num'],
+                                               download_to[3])
                 else:
-                    download_to = "downloads/" + download_to[3] + "/" + file["fullname"]
+                    download_to = os.path.join(self._save_path,
+                                               download_to[3],
+                                               file["fullname"])
+
                 download_list.append((download_path, download_to))
         if len(download_list) == 0:
             return
