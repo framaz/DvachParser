@@ -9,6 +9,7 @@ class DvachInput(ConsoleDebugInput):
         data = data.split(" ")
         if data[0] in ["l", "list"]:
             return ListProvidersCommand()
+
         if data[0] in ["d", "download"]:
             path = None
             if len(data) > 2:
@@ -42,5 +43,5 @@ class DownloaderFromDvach(Command):
                 break
         if found == -1:
             NewProviderCommand("dv", args=[self._link]).execute_command(phfsys)
-        NewHookCommand("dvD", found, self._save_path).execute_command(phfsys)
+        NewHookCommand("dvD", found, [self._save_path]).execute_command(phfsys)
         return f"Downloading from {self._link} started."
