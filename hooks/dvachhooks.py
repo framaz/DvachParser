@@ -5,13 +5,23 @@ from phf.utils import download_files
 
 
 class DvachShowHook(AbstractHook):
+    """Basic hook for printing all messages from dvach.
+
+    Attributes:
+        last_posts: set of already processed posts.
+    """
     _alias = ["dvS"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.last_posts = set()
 
-    def get_updated_text(self, posts):
+    def get_updated_text(self, posts: list):
+        """Get only unprocessed posts.
+
+        Args:
+            posts: a list of all posts in thread currently.
+        """
         res = []
         for post in posts:
             if post['num'] not in self.last_posts:
@@ -19,19 +29,32 @@ class DvachShowHook(AbstractHook):
                 res.append(post)
         return res
 
-    async def hook_action(self, output):
+    async def hook_action(self, output: list):
+        """Print all new posts.
+
+        Args:
+            output: list of thread posts."""
         to_print = str(self.get_updated_text(output))
         if to_print == "[]":
             return
         print("                                                          ", end="\r")
         print("\n" + to_print)
-        print("\rPress any button to add new stuff", end="\r")
 
 
 class DvachFileDownloader(DvachShowHook):
+    """Download files from dvach thread hook.
+
+    Attributes:
+        _save_path: str, where to save files to.
+        """
     _alias = ["dvD"]
 
     def __init__(self, save_path: str = None, *args, **kwargs):
+        """Create dvach downloader hook.
+
+        Args:
+            save_path: path to where to save everything.
+            """
         super().__init__(*args, **kwargs)
         if save_path is not None:
             self._save_path = save_path
@@ -39,6 +62,11 @@ class DvachFileDownloader(DvachShowHook):
             self._save_path = "downloads"
 
     async def hook_action(self, output):
+        """Save all files from new posts.
+
+        Args:
+            output: new posts.
+        """
         posts = self.get_updated_text(output)
         download_list = []
         for post in posts:
